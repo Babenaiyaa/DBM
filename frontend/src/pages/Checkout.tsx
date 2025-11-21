@@ -20,6 +20,7 @@ const Checkout = () => {
   const [formData, setFormData] = useState({
     name: '',
     whatsapp: '',
+    email: '',
     address: '',
     paymentMethod: 'COD'
   });
@@ -47,6 +48,7 @@ const Checkout = () => {
         body: JSON.stringify({
           customerName: formData.name,
           whatsapp: formData.whatsapp,
+          email: formData.email || undefined,
           address: formData.address,
           paymentMethod: formData.paymentMethod,
           paymentRefId: paymentRef || null,
@@ -121,6 +123,16 @@ const Checkout = () => {
                 <div>
                   <Label htmlFor="whatsapp">WhatsApp Number *</Label>
                   <Input id="whatsapp" type="tel" placeholder="+94771234567" value={formData.whatsapp} onChange={e => setFormData({ ...formData, whatsapp: e.target.value })} required />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email (for order updates)</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={formData.email}
+                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="address">Delivery Address *</Label>

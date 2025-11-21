@@ -11,6 +11,7 @@ const orderSchema = new mongoose.Schema({
   ],
   customerName: String,
   whatsapp: String,
+  email: String, // Optional customer email for notifications
   address: String,
   paymentMethod: String, // COD or Bank Transfer
   paymentRefId: { type: String, default: null },

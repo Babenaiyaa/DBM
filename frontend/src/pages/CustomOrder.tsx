@@ -16,6 +16,7 @@ const CustomOrder = () => {
   const [formData, setFormData] = useState({
     name: '',
     whatsapp: '',
+    email: '',
     address: '',
     deliveryDate: '',
     material: '',
@@ -63,6 +64,9 @@ const CustomOrder = () => {
       data.append('name', formData.name);
       data.append('whatsapp', formData.whatsapp);
       data.append('address', formData.address);
+      if (formData.email) {
+        data.append('email', formData.email);
+      }
       data.append('expectedDelivery', formData.deliveryDate);
       data.append('material', formData.material);
       data.append('sizeDetails', formData.size);
@@ -132,6 +136,17 @@ const CustomOrder = () => {
                   required
                 />
               </div>
+            </div>
+
+            <div>
+              <Label htmlFor="email">Email (for order updates)</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
             </div>
 
             <div>

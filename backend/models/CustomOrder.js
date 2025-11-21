@@ -5,6 +5,7 @@ const customOrderSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     whatsapp: { type: String, required: true },
+    email: { type: String }, // Optional customer email for notifications
     address: { type: String },
     expectedDelivery: { type: String },
     material: { type: String, required: true },
@@ -15,6 +16,11 @@ const customOrderSchema = new mongoose.Schema(
         type: String, // URL or file path
       },
     ],
+    status: {
+      type: String,
+      enum: ["Pending", "Confirmed"],
+      default: "Pending",
+    },
   },
   { timestamps: true }
 );

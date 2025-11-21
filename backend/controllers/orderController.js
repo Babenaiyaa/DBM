@@ -1,4 +1,5 @@
 import Order from "../models/Order.js";
+import { sendEmail } from "../utils/emailService.js";
 
 // Generate unique reference ID
 function generatePaymentRef() {
@@ -12,6 +13,7 @@ export const createOrder = async (req, res) => {
     const {
       customerName,
       whatsapp,
+      email,
       address,
       paymentMethod,
       items,
@@ -24,12 +26,44 @@ export const createOrder = async (req, res) => {
     const newOrder = await Order.create({
       customerName,
       whatsapp,
+      email,
       address,
       paymentMethod,
       paymentRefId,
       orderItems: items,
       totalPrice,
     });
+
+    // Notify customer by email if address provided
+    if (email) {
+      const isBankTransfer = paymentMethod === "Bank Transfer";
+      const subject = isBankTransfer
+        ? "Your order has been placed - bank transfer details"
+        : "Your order has been placed successfully";
+
+      const lines = [
+        `Hi ${customerName},`,
+        "",
+        "Thank you for your order.",
+        isBankTransfer && paymentRefId
+          ? `Your payment reference ID is: ${paymentRefId}.`
+          : null,
+        "",
+        `Total amount: Rs. ${totalPrice}`,
+        "",
+        "We will contact you soon with delivery details.",
+        "",
+        "Best regards,",
+        "DBM",
+      ].filter(Boolean);
+
+      void sendEmail({
+        to: email,
+        subject,
+        text: lines.join("\n"),
+        html: `<p>${lines.join("</p><p>")}</p>`,
+      });
+    }
 
     res.status(201).json({
       message: "Order created successfully",
@@ -71,6 +105,16 @@ export const updateOrderStatus = async (req, res) => {
       { status },
       { new: true }
     );
+
+    // Optionally send email when status becomes successful
+    if (updatedOrder?.email && status === "Completed") {
+      void sendEmail({
+        to: updatedOrder.email,
+        subject: "Your order has been completed",
+        text: `Hi ${updatedOrder.customerName},\n\nYour order has been marked as completed. It will be delivered soon.\n\nThank you!`,
+        html: `<p>Hi ${updatedOrder.customerName},</p><p>Your order has been <strong>completed</strong>. It will be delivered soon.</p><p>Thank you!</p>`,
+      });
+    }
 
     res.status(200).json(updatedOrder);
   } catch (error) {
