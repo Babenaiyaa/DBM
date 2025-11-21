@@ -29,11 +29,13 @@ interface CustomOrder {
   _id: string;
   name: string;
   whatsapp: string;
+  email?: string;
   address?: string;
   expectedDelivery?: string;
   material: string;
   sizeDetails: string;
   referenceImages: string[];
+  status?: "Pending" | "Confirmed";
   createdAt: string;
 }
 
@@ -109,6 +111,25 @@ export default function AdminOrders() {
     } catch (err) {
       console.error(err);
       toast({ title: 'Failed to delete custom order', variant: 'destructive' });
+    }
+  };
+
+  const handleConfirmCustom = async (id: string) => {
+    try {
+      const res = await fetch(`${CUSTOM_API_URL}/${id}/confirm`, {
+        method: "PUT",
+      });
+      if (!res.ok) {
+        throw new Error("Failed to confirm custom order");
+      }
+      toast({ title: "Custom order confirmed" });
+      loadCustomOrders();
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Failed to confirm custom order",
+        variant: "destructive",
+      });
     }
   };
 
@@ -244,10 +265,23 @@ export default function AdminOrders() {
             <Card key={order._id}>
               <CardHeader>
                 <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg">Custom Order</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {format(new Date(order.createdAt), 'MMM dd, yyyy HH:mm')}
-                  </p>
+                  <div>
+                    <CardTitle className="text-lg">Custom Order</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      {format(new Date(order.createdAt), "MMM dd, yyyy HH:mm")}
+                    </p>
+                  </div>
+                  {order.status && (
+                    <Badge
+                      className={
+                        order.status === "Confirmed"
+                          ? "bg-green-500"
+                          : "bg-yellow-500"
+                      }
+                    >
+                      {order.status}
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
 
@@ -257,6 +291,9 @@ export default function AdminOrders() {
                     <p className="font-semibold">Customer</p>
                     <p>{order.name}</p>
                     <p className="text-muted-foreground">{order.whatsapp}</p>
+                    {order.email && (
+                      <p className="text-muted-foreground">{order.email}</p>
+                    )}
                   </div>
 
                   <div>
@@ -291,13 +328,25 @@ export default function AdminOrders() {
                   </div>
                 )}
 
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => handleDeleteCustom(order._id)}
-                >
-                  Delete
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant={
+                      order.status === "Confirmed" ? "outline" : "default"
+                    }
+                    disabled={order.status === "Confirmed"}
+                    onClick={() => handleConfirmCustom(order._id)}
+                  >
+                    {order.status === "Confirmed" ? "Confirmed" : "Confirm"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => handleDeleteCustom(order._id)}
+                  >
+                    Delete
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
